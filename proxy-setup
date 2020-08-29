@@ -1,0 +1,52 @@
+1- create .conf file under etc/nginx/sites-available/ is dir.
+2- create softlink >> ln -s /etc/nginx/sites-available/<file_name>.conf /etc/nginx/sites-enabled/<file_name>.conf
+3- nginx -t
+4- service nginx reload
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+vim  /etc/nginx/site-avaliable/load_balancer.conf 
+>>
+#if you have 3 contaieners (app1, app2, app3)
+#want to access with 3 indivisual ips (172.31.253.5 || 253.8 || 253.9)
+  
+  
+#Create Upstream block  
+	# This block for thos server ip which can access wios server 
+	#if req comes on this ip within block --> forward to wios server wich is http://172.31.253.5:8080
+	#means if user enter any of this ip (5||8) it will forwarded to wios server ^
+   upstream wios {
+      server 172.31.253.5;
+      server 172.31.253.8;
+   }
+		
+	#this block can ip access second app
+	#if user hit this ip (9) --> forwarded to test-app server which is http://172.31.253.5:8080
+   upstream testapp {
+      server 172.31.253.9;
+   }
+
+   # This server accepts all traffic to port 80 and passes it to the upstream.
+   # Notice that the upstream name and the proxy_pass need to match.
+
+   server {
+      listen 80;
+      server_name 172.31.253.8;
+      server_name 172.31.253.9;    
+      
+      location / {
+          proxy_pass http://172.31.253.5:8080;
+      }
+   }
+
+ server {
+      listen 80;
+      server_name 172.31.253.9;
+     location / {
+          proxy_pass http://172.31.253.5:8888;
+      }
+   }
+
+
+
+
